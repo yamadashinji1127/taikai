@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>剣道大会連絡表</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', 'Yu Gothic', sans-serif;
+      background: #f2f2f2;
+      color: #333;
+      font-size: 15px;
+    }
+
+    /* ===== LAYOUT ===== */
+    #app {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      color: #2e7d32;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #4caf50;
+      padding-bottom: 8px;
+    }
+    h2 {
+      font-size: 16px;
+      color: #2e7d32;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      background: #c8e6c9;
+      border-left: 4px solid #4caf50;
+      border-radius: 2px;
+    }
+    h3 {
+      font-size: 14px;
+      color: #1b5e20;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    /* ===== INPUT AREA ===== */
+    #input-area {
+      background: #fff;
+      border: 1px solid #a5d6a7;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .tournaments-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .tournaments-grid { grid-template-columns: 1fr; }
+    }
+    .tournament-form {
+      background: #f9fbe7;
+      border: 1px solid #c5e1a5;
+      border-radius: 6px;
+      padding: 14px;
+    }
+    .tournament-form h3 {
+      background: #4caf50;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    /* ===== FORM FIELDS ===== */
+    .field-group {
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .field-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: bold;
+      color: #388e3c;
+      margin-bottom: 3px;
+    }
+    .field-group input[type="text"],
+    .field-group input[type="date"],
+    .field-group textarea,
+    .field-group select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 13px;
+      background: #fff;
+      color: #1b5e20;
+    }
+    .field-group input:focus,
+    .field-group textarea:focus,
+    .field-group select:focus {
+      outline: none;
+      border-color: #4caf50;
+      box-shadow: 0 0 0 2px rgba(76,175,80,0.2);
+    }
+    .field-group textarea {
+      resize: vertical;
+      min-height: 56px;
+    }
+
+    /* ===== CHIPS ===== */
+    .chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+      min-height: 0;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      border-radius: 12px;
+      padding: 2px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      color: #2e7d32;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .chip:hover { background: #c8e6c9; border-color: #66bb6a; }
+
+    /* ===== TOGGLE ===== */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .toggle-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #388e3c;
+    }
+    .toggle-btn {
+      display: inline-flex;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      overflow: hidden;
+      font-size: 12px;
+    }
+    .toggle-btn button {
+      padding: 4px 12px;
+      border: none;
+      background: #f1f8e9;
+      color: #388e3c;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      transition: background 0.15s;
+    }
+    .toggle-btn button.active {
+      background: #4caf50;
+      color: white;
+    }
+    .toggle-btn button:hover:not(.active) { background: #c8e6c9; }
+
+    /* ===== MEMBERS SECTION ===== */
+    .members-section {
+      background: #f1f8e9;
+      border: 1px solid #c8e6c9;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .individual-members {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .member-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .member-row input {
+      flex: 1;
+      padding: 4px 8px;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .btn-remove {
+      background: #ef9a9a;
+      border: none;
+      border-radius: 3px;
+      color: #b71c1c;
+      cursor: pointer;
+      padding: 2px 8px;
+      font-size: 12px;
+    }
+    .btn-remove:hover { background: #e57373; }
+    .btn-add {
+      background: #a5d6a7;
+      border: none;
+      border-radius: 4px;
+      color: #1b5e20;
+      cursor: pointer;
+      padding: 4px 12px;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .btn-add:hover { background: #81c784; }
+
+    /* ===== TEAMS ===== */
+    .team-block {
+      background: #fff;
+      border: 1px solid #c8e6c9;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    .team-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .team-header input[type="text"] {
+      width: 100px;
+      padding: 3px 6px;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .format-select {
+      padding: 3px 6px;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      background: #f9fbe7;
+    }
+    .positions-grid {
+      display: grid;
+      gap: 4px;
+    }
+    .position-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .position-label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #388e3c;
+      width: 32px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .position-row input {
+      flex: 1;
+      padding: 3px 6px;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #388e3c; }
+    .btn-secondary {
+      background: #fff;
+      color: #388e3c;
+      border: 2px solid #4caf50;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: #e8f5e9; }
+    .btn-danger {
+      background: #ef9a9a;
+      color: #b71c1c;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-danger:hover { background: #e57373; }
+    .btn-edit {
+      background: #fff9c4;
+      color: #f57f17;
+      border: 1px solid #ffd54f;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-edit:hover { background: #fff59d; }
+
+    /* ===== PREVIEW AREA ===== */
+    #preview-area {
+      margin-bottom: 20px;
+    }
+    #preview-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
+    }
+    /*
+      A4横: 297mm × 210mm
+      96dpi換算: 1122px × 794px 固定
+      transform: scale() でスクリーンに合わせて縮小
+    */
+    #preview-sheet {
+      width: 1122px;
+      height: 794px;
+      background: #ffffff;
+      border: 2px solid #9e9e9e;
+      display: flex;
+      flex-direction: column;
+      transform-origin: top center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .preview-row {
+      display: flex;
+      flex-direction: row;
+      border-bottom: 1px solid #cccccc;
+      overflow: hidden;
+      /* 幅変動防止: 合計1122px固定 */
+    }
+    .preview-row:last-child { border-bottom: none; }
+    .preview-cell {
+      border-right: 1px solid #cccccc;
+      overflow: hidden;
+      padding: 3px 6px;
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      /* 幅は px 固定でwidth変動を防ぐ */
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+    .preview-cell:last-child { border-right: none; }
+
+    /* 項目名列（試合名以外）: 薄グレー */
+    .cell-header {
+      background: #e8e8e8;
+      color: #333333;
+      font-weight: bold;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 14px;
+    }
+    /* データ列: 白 */
+    .cell-data {
+      background: #ffffff;
+      color: #222222;
+    }
+
+    /* ★ 試合名行だけ全セルを濃い緑 */
+    .row-title .preview-cell {
+      background: #2e7d32 !important;
+      color: #ffffff !important;
+      font-weight: bold;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* 列幅: px固定（合計1122px）*/
+    .cell-name { width: 168px; } /* 15% */
+    .cell-t1   { width: 477px; } /* 42.5% */
+    .cell-t2   { width: 477px; } /* 42.5% */
+
+    /* 行の高さ比率（flex） */
+    .row-title    { flex: 1;  min-height: 0; }
+    .row-date     { flex: 1;  min-height: 0; }
+    .row-members  { flex: 5;  min-height: 0; }
+    .row-inst     { flex: 1;  min-height: 0; }
+    .row-referee  { flex: 1;  min-height: 0; }
+    .row-venue    { flex: 1;  min-height: 0; }
+    .row-transport{ flex: 1;  min-height: 0; }
+    .row-gather   { flex: 1;  min-height: 0; }
+    .row-recept   { flex: 2;  min-height: 0; }
+    .row-notes    { flex: 4;  min-height: 0; }
+
+    .cell-center {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .cell-left {
+      align-items: flex-start;
+      justify-content: flex-start;
+      text-align: left;
+    }
+    .members-preview {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .members-preview-section {
+      flex: 1;
+      overflow: hidden;
+    }
+    .members-preview-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #1a5e1a;
+      border-bottom: 1px solid #aaa;
+      margin-bottom: 2px;
+    }
+    .preview-text {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* ===== SAVED LIST ===== */
+    #list-area {
+      background: #fff;
+      border: 1px solid #a5d6a7;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .list-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .list-controls input {
+      padding: 6px 10px;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      width: 240px;
+    }
+    #records-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    #records-table th {
+      background: #4caf50;
+      color: white;
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 12px;
+    }
+    #records-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #c8e6c9;
+      vertical-align: middle;
+    }
+    #records-table tr:nth-child(even) td { background: #f9fbe7; }
+    #records-table tr:hover td { background: #e8f5e9; }
+    .no-records {
+      text-align: center;
+      color: #888;
+      padding: 20px;
+    }
+
+    /* ===== NOTIFICATION ===== */
+    #notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #4caf50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      #input-area, #list-area, .action-bar, h1, #notification, #cand-modal-overlay { display: none !important; }
+      #preview-area { margin: 0; }
+      #preview-wrapper { justify-content: flex-start; }
+      #preview-sheet {
+        transform: none !important;
+        width: 287mm !important;
+        height: 200mm !important;
+        border: 1px solid #388e3c;
+        font-size: 10pt;
+      }
+    }
+    @page { size: A4 landscape; margin: 5mm; }
+
+    /* ===== MISC ===== */
+    .edit-mode-banner {
+      background: #fff9c4;
+      border: 1px solid #ffd54f;
+      border-radius: 4px;
+      padding: 8px 14px;
+      margin-bottom: 12px;
+      color: #e65100;
+      font-size: 13px;
+      font-weight: bold;
+      display: none;
+    }
+    .section-divider {
+      border: none;
+      border-top: 1px dashed #a5d6a7;
+      margin: 10px 0;
+    }
+    .collapse-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: #388e3c;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    /* ===== MOBILE PREVIEW（スクショ専用カードレイアウト）===== */
+    #mobile-preview {
+      display: none; /* PCでは非表示 */
+      width: 100%;
+    }
+
+    /* カード1枚 = 大会1件 */
+    .mob-card {
+      background: #fff;
+      border: 2px solid #2e7d32;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.13);
+    }
+
+    /* 大会タイトル行：濃い緑 */
+    .mob-card-title {
+      background: #2e7d32;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      padding: 12px 16px;
+      letter-spacing: 0.04em;
+      line-height: 1.3;
+    }
+    .mob-card-title-sub {
+      font-size: 12px;
+      font-weight: normal;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    /* 日程行 */
+    .mob-card-date {
+      background: #e8f5e9;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-bottom: 1px solid #c8e6c9;
+      color: #1b5e20;
+    }
+
+    /* 各データ行（flex） */
+    .mob-row {
+      display: flex;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .mob-row:last-child { border-bottom: none; }
+
+    /* 左の項目ラベル */
+    .mob-label {
+      background: #f1f8e9;
+      color: #2e7d32;
+      font-weight: bold;
+      font-size: 13px;
+      padding: 9px 8px;
+      width: 64px;
+      min-width: 64px;
+      flex-shrink: 0;
+      border-right: 1px solid #c8e6c9;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+
+    /* 右の内容 */
+    .mob-value {
+      background: #fff;
+      color: #222;
+      font-size: 15px;
+      padding: 9px 12px;
+      flex: 1;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
+    /* 選手欄: グループタイトル */
+    .mob-member-group-title {
+      font-weight: bold;
+      font-size: 13px;
+      color: #388e3c;
+      background: #f1f8e9;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+
+    /* 個人戦: チップ並び */
+    .mob-member-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .mob-member-chip {
+      background: #e8f5e9;
+      border: 1px solid #81c784;
+      border-radius: 4px;
+      padding: 3px 10px;
+      font-size: 14px;
+      color: #1b5e20;
+    }
+
+    /* 団体戦: ポジション表 */
+    .mob-team-block {
+      margin-bottom: 8px;
+    }
+    .mob-pos-table {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 3px;
+    }
+    .mob-pos-item {
+      font-size: 14px;
+      color: #333;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+    .mob-pos-label {
+      color: #888;
+      font-size: 12px;
+      margin-right: 2px;
+    }
+
+    /* スマホでのみ表示切り替え */
+    @media (max-width: 900px) {
+      /* A4シートを非表示 */
+      #preview-sheet { display: none !important; }
+      /* モバイルカードを表示 */
+      #mobile-preview { display: block; }
+      /* wrapperの高さ自動に */
+      #preview-wrapper {
+        height: auto !important;
+        overflow: visible;
+      }
+    }
+
+    /* ===== 候補管理モーダル ===== */
+    .cand-section {
+      margin-bottom: 18px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .cand-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .cand-section-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+    }
+    .btn-clear-all {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+      border-radius: 4px;
+      padding: 2px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-clear-all:hover { background: #ffcdd2; }
+    .cand-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      min-height: 24px;
+    }
+    .cand-chip-item {
+      display: inline-flex;
+      align-items: center;
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 3px 8px 3px 12px;
+      font-size: 13px;
+      gap: 5px;
+      color: #333;
+    }
+    .cand-chip-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #999;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0;
+    }
+    .cand-chip-del:hover { color: #e53935; }
+    .cand-empty {
+      font-size: 12px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <h1>⚔ 剣道大会連絡表</h1>
+
+  <!-- Edit mode banner -->
+  <div id="edit-banner" class="edit-mode-banner">
+    ✏️ 編集モード（レコードID: <span id="edit-id-display"></span>）
+  </div>
+
+  <!-- ===== INPUT AREA ===== -->
+  <div id="input-area">
+    <h2>入力フォーム</h2>
+    <div class="tournaments-grid">
+      <!-- Tournament 1 -->
+      <div class="tournament-form" id="form-t1"></div>
+      <!-- Tournament 2 -->
+      <div class="tournament-form" id="form-t2"></div>
+    </div>
+  </div>
+
+  <!-- ===== ACTION BUTTONS ===== -->
+  <div class="action-bar">
+    <button class="btn-primary" onclick="saveRecord()">💾 保存</button>
+    <button class="btn-secondary" onclick="cancelEdit()">✖ キャンセル / クリア</button>
+    <button class="btn-secondary" onclick="window.print()">🖨 印刷</button>
+    <button class="btn-secondary" onclick="openCandManager()" style="border-color:#888;color:#555;">🗂 記憶管理</button>
+  </div>
+
+  <!-- ===== 候補記憶管理モーダル ===== -->
+  <div id="cand-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;overflow-y:auto;">
+    <div id="cand-modal" style="background:#fff;max-width:640px;margin:40px auto;border-radius:8px;padding:24px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
+      <h2 style="margin-bottom:16px;font-size:17px;">🗂 記憶データ管理</h2>
+      <p style="font-size:12px;color:#666;margin-bottom:16px;">各候補の「×」で個別削除、「全削除」でカテゴリごと全削除できます。</p>
+      <div id="cand-manager-body"></div>
+      <div style="text-align:right;margin-top:16px;">
+        <button class="btn-secondary" onclick="closeCandManager()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PREVIEW AREA ===== -->
+  <div id="preview-area">
+    <h2>プレビュー（A4横 / スマホスクショ）</h2>
+    <div id="preview-wrapper">
+      <!-- PC: A4横固定レイアウト -->
+      <div id="preview-sheet">
+        <!-- Built dynamically -->
+      </div>
+      <!-- スマホ: スクショ用カードレイアウト -->
+      <div id="mobile-preview">
+        <!-- Built dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SAVED LIST ===== -->
+  <div id="list-area">
+    <h2>保存済みデータ</h2>
+    <div class="list-controls">
+      <input type="text" id="search-input" placeholder="試合名で検索..." oninput="renderList()">
+      <button class="btn-secondary" onclick="renderList()" style="padding:6px 14px;font-size:13px;">🔄 更新</button>
+    </div>
+    <table id="records-table">
+      <thead>
+        <tr>
+          <th>保存日時</th>
+          <th>大会① 試合名</th>
+          <th>大会② 試合名</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="records-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="notification"></div>
+
+<script>
+'use strict';
+
+/* ===================================================================
+   CONSTANTS
+=================================================================== */
+const POSITIONS_5 = ['先鋒','次鋒','中堅','副将','大将'];
+const POSITIONS_3 = ['先鋒','中堅','大将'];
+const TEAM_NAMES  = ['Aチーム','Bチーム','Cチーム','Dチーム','Eチーム'];
+const DB_NAME     = 'KendoDB';
+const DB_STORE    = 'records';
+const LS_FORM     = 'kendoFormDraft';
+const LS_CAND     = 'kendoCandidates';
+
+/* ===================================================================
+   STATE
+=================================================================== */
+let db = null;
+let editingId = null; // null = new record
+// 最後にフォーカスされた選手入力欄（チップタップ時の入力先）
+let lastFocusedPlayerInput = null;
+
+// Form data model (2 tournaments)
+function emptyTournament() {
+  return {
+    name: '',
+    date: '',
+    individual: { enabled: false, members: [] },
+    teams: [],
+    instructor: '',
+    referee: '',
+    venue: '',
+    transport: '',
+    gathering: '',
+    reception: '',
+    notes: ''
+  };
+}
+
+let formData = {
+  tournament1: emptyTournament(),
+  tournament2: emptyTournament()
+};
+
+// Candidate pools stored in localStorage
+// staffCands: 指導者, 審判 pool
+// playerCands: 選手名, チーム名 pool
+// venueCands, transportCands, gatherCands, receptCands, notesCands, nameCands
+function loadCandidates() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_CAND)) || {};
+  } catch { return {}; }
+}
+function saveCandidates(cands) {
+  localStorage.setItem(LS_CAND, JSON.stringify(cands));
+}
+function addCandidate(pool, value) {
+  if (!value || !value.trim()) return;
+  const v = value.trim();
+  let cands = loadCandidates();
+  if (!cands[pool]) cands[pool] = [];
+  if (!cands[pool].includes(v)) {
+    cands[pool].unshift(v);
+    if (cands[pool].length > 30) cands[pool] = cands[pool].slice(0, 30);
+  }
+  saveCandidates(cands);
+}
+function getCandidates(pool) {
+  const cands = loadCandidates();
+  return cands[pool] || [];
+}
+
+/* ===================================================================
+   INDEXEDDB
+=================================================================== */
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(DB_STORE)) {
+        const store = d.createObjectStore(DB_STORE, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('savedAt', 'savedAt', { unique: false });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+function dbSave(record) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    const store = tx.objectStore(DB_STORE);
+    const req = record.id ? store.put(record) : store.add(record);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+function dbGetAll() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, 'readonly');
+    const req = tx.objectStore(DB_STORE).getAll();
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+function dbGet(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, 'readonly');
+    const req = tx.objectStore(DB_STORE).get(id);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+function dbDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    const req = tx.objectStore(DB_STORE).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+/* ===================================================================
+   FORM BUILDER
+=================================================================== */
+function buildForms() {
+  buildTournamentForm('form-t1', 'tournament1', '大会①');
+  buildTournamentForm('form-t2', 'tournament2', '大会②');
+}
+
+function buildTournamentForm(containerId, tKey, label) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const t = formData[tKey];
+
+  // Title
+  const titleEl = document.createElement('h3');
+  titleEl.textContent = label;
+  container.appendChild(titleEl);
+
+  // 試合名
+  appendField(container, '試合名', tKey, 'name', 'text', 'name');
+
+  // 日程
+  appendDateField(container, '日程', tKey, 'date');
+
+  // ===== MEMBER SECTION =====
+  const memSec = document.createElement('div');
+  memSec.className = 'members-section';
+  memSec.id = `${tKey}-members-section`;
+
+  // Individual battle
+  {
+    const row = document.createElement('div');
+    row.className = 'toggle-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'toggle-label';
+    lbl.textContent = '個人戦:';
+    const togDiv = document.createElement('div');
+    togDiv.className = 'toggle-btn';
+    const btnAri = document.createElement('button');
+    btnAri.textContent = 'あり';
+    btnAri.dataset.val = 'true';
+    const btnNashi = document.createElement('button');
+    btnNashi.textContent = 'なし';
+    btnNashi.dataset.val = 'false';
+    if (t.individual.enabled) btnAri.classList.add('active');
+    else btnNashi.classList.add('active');
+    btnAri.onclick  = () => { t.individual.enabled = true;  btnAri.classList.add('active'); btnNashi.classList.remove('active'); rebuildMemberArea(tKey); autoSaveDraft(); };
+    btnNashi.onclick = () => { t.individual.enabled = false; btnNashi.classList.add('active'); btnAri.classList.remove('active'); rebuildMemberArea(tKey); autoSaveDraft(); };
+    togDiv.appendChild(btnAri);
+    togDiv.appendChild(btnNashi);
+    row.appendChild(lbl);
+    row.appendChild(togDiv);
+    memSec.appendChild(row);
+  }
+
+  // Individual member area
+  const indivArea = document.createElement('div');
+  indivArea.id = `${tKey}-indiv-area`;
+  memSec.appendChild(indivArea);
+
+  const divider = document.createElement('hr');
+  divider.className = 'section-divider';
+  memSec.appendChild(divider);
+
+  // Team battle
+  {
+    const row = document.createElement('div');
+    row.className = 'toggle-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'toggle-label';
+    lbl.textContent = '団体戦:';
+    const togDiv = document.createElement('div');
+    togDiv.className = 'toggle-btn';
+    const btnAri = document.createElement('button');
+    btnAri.textContent = 'あり';
+    const btnNashi = document.createElement('button');
+    btnNashi.textContent = 'なし';
+    const teamsEnabled = t.teams.length > 0;
+    if (teamsEnabled) btnAri.classList.add('active');
+    else btnNashi.classList.add('active');
+    btnAri.onclick  = () => { if (t.teams.length === 0) addTeam(tKey); btnAri.classList.add('active'); btnNashi.classList.remove('active'); rebuildTeamArea(tKey); autoSaveDraft(); };
+    btnNashi.onclick = () => { t.teams = []; btnNashi.classList.add('active'); btnAri.classList.remove('active'); rebuildTeamArea(tKey); autoSaveDraft(); };
+    togDiv.appendChild(btnAri);
+    togDiv.appendChild(btnNashi);
+    row.appendChild(lbl);
+    row.appendChild(togDiv);
+    memSec.appendChild(row);
+  }
+
+  const teamArea = document.createElement('div');
+  teamArea.id = `${tKey}-team-area`;
+  memSec.appendChild(teamArea);
+
+  container.appendChild(memSec);
+  rebuildMemberArea(tKey);
+  rebuildTeamArea(tKey);
+
+  // 指導者
+  appendFieldWithChips(container, '指導者', tKey, 'instructor', 'text', 'staff', 'set');
+  // 審判
+  appendFieldWithChips(container, '審判', tKey, 'referee', 'text', 'staff', 'set');
+  // 会場
+  appendFieldWithChips(container, '会場', tKey, 'venue', 'text', 'venue', 'set');
+  // 移動
+  appendFieldWithChips(container, '移動', tKey, 'transport', 'text', 'transport', 'set');
+  // 集合・出発
+  appendFieldWithChips(container, '集合・出発', tKey, 'gathering', 'textarea', 'gather', 'set');
+  // 受付
+  appendFieldWithChips(container, '受付', tKey, 'reception', 'textarea', 'recept', 'set');
+  // 備考
+  appendFieldWithChips(container, '備考欄', tKey, 'notes', 'textarea', 'notes', 'append');
+}
+
+function appendField(container, labelText, tKey, field, type, candPool) {
+  const fg = document.createElement('div');
+  fg.className = 'field-group';
+  const lbl = document.createElement('label');
+  lbl.textContent = labelText;
+  fg.appendChild(lbl);
+  const inp = document.createElement('input');
+  inp.type = type;
+  inp.value = formData[tKey][field] || '';
+  inp.id = `${tKey}-${field}`;
+  inp.addEventListener('input', () => { formData[tKey][field] = inp.value; updatePreview(); autoSaveDraft(); });
+  inp.addEventListener('blur', () => { if (candPool) addCandidate(candPool, inp.value); });
+  fg.appendChild(inp);
+  container.appendChild(fg);
+}
+
+function appendDateField(container, labelText, tKey, field) {
+  const fg = document.createElement('div');
+  fg.className = 'field-group';
+  const lbl = document.createElement('label');
+  lbl.textContent = labelText;
+  fg.appendChild(lbl);
+  const inp = document.createElement('input');
+  inp.type = 'date';
+  inp.value = formData[tKey][field] || '';
+  inp.id = `${tKey}-${field}`;
+  inp.addEventListener('input', () => { formData[tKey][field] = inp.value; updatePreview(); autoSaveDraft(); });
+  fg.appendChild(inp);
+  container.appendChild(fg);
+}
+
+function appendFieldWithChips(container, labelText, tKey, field, type, candPool, chipAction) {
+  const fg = document.createElement('div');
+  fg.className = 'field-group';
+  const lbl = document.createElement('label');
+  lbl.textContent = labelText;
+  fg.appendChild(lbl);
+
+  let inp;
+  if (type === 'textarea') {
+    inp = document.createElement('textarea');
+    inp.rows = 2;
+  } else {
+    inp = document.createElement('input');
+    inp.type = 'text';
+  }
+  inp.value = formData[tKey][field] || '';
+  inp.id = `${tKey}-${field}`;
+  inp.addEventListener('input', () => { formData[tKey][field] = inp.value; updatePreview(); autoSaveDraft(); });
+  inp.addEventListener('blur', () => { addCandidate(candPool, inp.value); renderChips(chipsDiv, candPool, inp, chipAction); });
+  inp.addEventListener('focus', () => { renderChips(chipsDiv, candPool, inp, chipAction); });
+  fg.appendChild(inp);
+
+  const chipsDiv = document.createElement('div');
+  chipsDiv.className = 'chips-container';
+  renderChips(chipsDiv, candPool, inp, chipAction);
+  fg.appendChild(chipsDiv);
+
+  container.appendChild(fg);
+}
+
+function renderChips(container, pool, inputEl, action) {
+  const cands = getCandidates(pool);
+  container.innerHTML = '';
+  cands.slice(0, 15).forEach(c => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = c;
+    chip.onclick = () => {
+      if (action === 'append') {
+        inputEl.value = inputEl.value ? inputEl.value + '\n' + c : c;
+      } else {
+        inputEl.value = c;
+      }
+      inputEl.dispatchEvent(new Event('input'));
+    };
+    container.appendChild(chip);
+  });
+}
+
+/* ===================================================================
+   INDIVIDUAL MEMBERS
+=================================================================== */
+function rebuildMemberArea(tKey) {
+  const area = document.getElementById(`${tKey}-indiv-area`);
+  if (!area) return;
+  area.innerHTML = '';
+  const t = formData[tKey];
+  if (!t.individual.enabled) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'individual-members';
+  wrapper.style.marginBottom = '4px';
+
+  t.individual.members.forEach((m, i) => {
+    wrapper.appendChild(buildMemberRow(tKey, i));
+  });
+  area.appendChild(wrapper);
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add';
+  addBtn.textContent = '＋ 選手追加';
+  addBtn.onclick = () => {
+    formData[tKey].individual.members.push('');
+    rebuildMemberArea(tKey);
+    autoSaveDraft();
+    updatePreview();
+  };
+  area.appendChild(addBtn);
+
+  // Chips for player candidates
+  const chipsLbl = document.createElement('div');
+  chipsLbl.style.cssText = 'font-size:11px;color:#388e3c;margin-top:4px;';
+  chipsLbl.textContent = '選手候補:';
+  area.appendChild(chipsLbl);
+  const chipsDiv = document.createElement('div');
+  chipsDiv.className = 'chips-container';
+  chipsDiv.id = `${tKey}-player-chips`;
+  renderPlayerChips(chipsDiv, tKey);
+  area.appendChild(chipsDiv);
+}
+
+function buildMemberRow(tKey, index) {
+  const row = document.createElement('div');
+  row.className = 'member-row';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.placeholder = `選手${index + 1}`;
+  inp.value = formData[tKey].individual.members[index] || '';
+  inp.addEventListener('input', () => {
+    formData[tKey].individual.members[index] = inp.value;
+    updatePreview();
+    autoSaveDraft();
+  });
+  inp.addEventListener('focus', () => { lastFocusedPlayerInput = inp; });
+  inp.addEventListener('blur', () => {
+    addCandidate('player', inp.value);
+    const cd = document.getElementById(`${tKey}-player-chips`);
+    if (cd) renderPlayerChips(cd, tKey);
+  });
+  const delBtn = document.createElement('button');
+  delBtn.className = 'btn-remove';
+  delBtn.textContent = '✕';
+  delBtn.onclick = () => {
+    formData[tKey].individual.members.splice(index, 1);
+    rebuildMemberArea(tKey);
+    updatePreview();
+    autoSaveDraft();
+  };
+  row.appendChild(inp);
+  row.appendChild(delBtn);
+  return row;
+}
+
+function renderPlayerChips(container, tKey) {
+  const cands = getCandidates('player');
+  container.innerHTML = '';
+  cands.slice(0, 15).forEach(c => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = c;
+    chip.onclick = () => {
+      // フォーカス中の入力欄があればそこに入れる、なければ末尾追加
+      if (lastFocusedPlayerInput && document.contains(lastFocusedPlayerInput)) {
+        lastFocusedPlayerInput.value = c;
+        lastFocusedPlayerInput.dispatchEvent(new Event('input'));
+      } else {
+        formData[tKey].individual.members.push(c);
+        rebuildMemberArea(tKey);
+        updatePreview();
+        autoSaveDraft();
+      }
+    };
+    container.appendChild(chip);
+  });
+}
+
+/* ===================================================================
+   TEAM MANAGEMENT
+=================================================================== */
+function addTeam(tKey) {
+  const t = formData[tKey];
+  const idx = t.teams.length;
+  const teamName = TEAM_NAMES[idx] || `チーム${idx + 1}`;
+  const fmt = '5';
+  const members = {};
+  POSITIONS_5.forEach(p => members[p] = '');
+  t.teams.push({ teamName, format: fmt, members });
+}
+
+function rebuildTeamArea(tKey) {
+  const area = document.getElementById(`${tKey}-team-area`);
+  if (!area) return;
+  area.innerHTML = '';
+  const t = formData[tKey];
+  if (t.teams.length === 0) return;
+
+  t.teams.forEach((team, ti) => {
+    area.appendChild(buildTeamBlock(tKey, ti));
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-add';
+  addBtn.style.marginTop = '4px';
+  addBtn.textContent = '＋ チーム追加';
+  addBtn.onclick = () => {
+    addTeam(tKey);
+    rebuildTeamArea(tKey);
+    updatePreview();
+    autoSaveDraft();
+  };
+  area.appendChild(addBtn);
+}
+
+function buildTeamBlock(tKey, ti) {
+  const team = formData[tKey].teams[ti];
+  const block = document.createElement('div');
+  block.className = 'team-block';
+
+  // Team header
+  const header = document.createElement('div');
+  header.className = 'team-header';
+
+  const nameInp = document.createElement('input');
+  nameInp.type = 'text';
+  nameInp.value = team.teamName;
+  nameInp.placeholder = 'チーム名';
+  nameInp.style.cssText = 'width:110px;padding:3px 6px;border:1px solid #a5d6a7;border-radius:4px;font-size:13px;font-family:inherit;';
+  nameInp.addEventListener('input', () => {
+    formData[tKey].teams[ti].teamName = nameInp.value;
+    updatePreview();
+    autoSaveDraft();
+  });
+  nameInp.addEventListener('blur', () => { addCandidate('player', nameInp.value); });
+
+  const fmtSel = document.createElement('select');
+  fmtSel.className = 'format-select';
+  ['5人制','3人制'].forEach((opt, oi) => {
+    const o = document.createElement('option');
+    o.value = String(oi === 0 ? 5 : 3);
+    o.textContent = opt;
+    if (team.format === String(oi === 0 ? 5 : 3)) o.selected = true;
+    fmtSel.appendChild(o);
+  });
+  fmtSel.addEventListener('change', () => {
+    const newFmt = fmtSel.value;
+    formData[tKey].teams[ti].format = newFmt;
+    const positions = newFmt === '5' ? POSITIONS_5 : POSITIONS_3;
+    const newMembers = {};
+    positions.forEach(p => newMembers[p] = formData[tKey].teams[ti].members[p] || '');
+    formData[tKey].teams[ti].members = newMembers;
+    rebuildTeamArea(tKey);
+    updatePreview();
+    autoSaveDraft();
+  });
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'btn-remove';
+  delBtn.textContent = '✕ 削除';
+  delBtn.onclick = () => {
+    formData[tKey].teams.splice(ti, 1);
+    if (formData[tKey].teams.length === 0) {
+      // Reset toggle buttons
+      const area = document.getElementById(`${tKey}-members-section`);
+      if (area) {
+        const btns = area.querySelectorAll('.toggle-btn');
+        if (btns.length > 1) {
+          btns[1].querySelectorAll('button')[0].classList.remove('active');
+          btns[1].querySelectorAll('button')[1].classList.add('active');
+        }
+      }
+    }
+    rebuildTeamArea(tKey);
+    updatePreview();
+    autoSaveDraft();
+  };
+
+  header.appendChild(nameInp);
+  header.appendChild(fmtSel);
+  header.appendChild(delBtn);
+  block.appendChild(header);
+
+  // Positions
+  const positions = team.format === '5' ? POSITIONS_5 : POSITIONS_3;
+  const grid = document.createElement('div');
+  grid.className = 'positions-grid';
+  positions.forEach(pos => {
+    const pr = document.createElement('div');
+    pr.className = 'position-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'position-label';
+    lbl.textContent = pos;
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = pos;
+    inp.value = team.members[pos] || '';
+    inp.addEventListener('focus', () => { lastFocusedPlayerInput = inp; });
+    inp.addEventListener('input', () => {
+      formData[tKey].teams[ti].members[pos] = inp.value;
+      updatePreview();
+      autoSaveDraft();
+    });
+    inp.addEventListener('blur', () => { addCandidate('player', inp.value); });
+    pr.appendChild(lbl);
+    pr.appendChild(inp);
+    grid.appendChild(pr);
+  });
+  block.appendChild(grid);
+
+  // Player chips for positions
+  const chipsLbl = document.createElement('div');
+  chipsLbl.style.cssText = 'font-size:11px;color:#388e3c;margin-top:4px;';
+  chipsLbl.textContent = '選手候補:';
+  block.appendChild(chipsLbl);
+  const chipsDiv = document.createElement('div');
+  chipsDiv.className = 'chips-container';
+  const cands = getCandidates('player');
+  cands.slice(0, 12).forEach(c => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = c;
+    // フォーカス中の欄に入れる。なければ次の空きポジションに入れる
+    chip.onmousedown = (e) => e.preventDefault(); // フォーカスを奪わない
+    chip.onclick = () => {
+      if (lastFocusedPlayerInput && document.contains(lastFocusedPlayerInput)) {
+        lastFocusedPlayerInput.value = c;
+        lastFocusedPlayerInput.dispatchEvent(new Event('input'));
+      } else {
+        // フォールバック: 次の空きポジションに入れる
+        const pList = formData[tKey].teams[ti].format === '5' ? POSITIONS_5 : POSITIONS_3;
+        for (const p of pList) {
+          if (!formData[tKey].teams[ti].members[p]) {
+            formData[tKey].teams[ti].members[p] = c;
+            rebuildTeamArea(tKey);
+            updatePreview();
+            autoSaveDraft();
+            return;
+          }
+        }
+      }
+    };
+    chipsDiv.appendChild(chip);
+  });
+  block.appendChild(chipsDiv);
+
+  return block;
+}
+
+/* ===================================================================
+   PREVIEW
+=================================================================== */
+function buildPreviewSheet() {
+  const sheet = document.getElementById('preview-sheet');
+  sheet.innerHTML = '';
+
+  const rows = [
+    { key: 'title',     label: '試合名',     cls: 'row-title',     render: renderTitle },
+    { key: 'date',      label: '日程',       cls: 'row-date',      render: renderDate },
+    { key: 'members',   label: '選手',       cls: 'row-members',   render: renderMembers },
+    { key: 'inst',      label: '指導者',     cls: 'row-inst',      render: renderInstructor },
+    { key: 'referee',   label: '審判',       cls: 'row-referee',   render: renderReferee },
+    { key: 'venue',     label: '会場',       cls: 'row-venue',     render: renderVenue },
+    { key: 'transport', label: '移動',       cls: 'row-transport', render: renderTransport },
+    { key: 'gather',    label: '集合・出発', cls: 'row-gather',    render: renderGather },
+    { key: 'recept',    label: '受付',       cls: 'row-recept',    render: renderRecept },
+    { key: 'notes',     label: '備考欄',     cls: 'row-notes',     render: renderNotes },
+  ];
+
+  rows.forEach(({ label, cls, render }) => {
+    const row = document.createElement('div');
+    row.className = `preview-row ${cls}`;
+
+    // Label cell
+    const labelCell = document.createElement('div');
+    labelCell.className = 'preview-cell cell-header cell-name cell-center';
+    labelCell.textContent = label;
+    row.appendChild(labelCell);
+
+    // T1 cell
+    const t1Cell = document.createElement('div');
+    t1Cell.className = 'preview-cell cell-data cell-t1';
+    render(t1Cell, formData.tournament1, 1);
+    row.appendChild(t1Cell);
+
+    // T2 cell
+    const t2Cell = document.createElement('div');
+    t2Cell.className = 'preview-cell cell-data cell-t2';
+    render(t2Cell, formData.tournament2, 2);
+    row.appendChild(t2Cell);
+
+    sheet.appendChild(row);
+  });
+
+  scalePreview();
+}
+
+function renderTitle(cell, t) {
+  cell.classList.add('cell-center');
+  const d = document.createElement('div');
+  // 試合名: 大きく中央揃え（行全体がCSS .row-title で緑になる）
+  d.style.cssText = 'text-align:center;font-weight:bold;font-size:22px;display:flex;align-items:center;justify-content:center;height:100%;letter-spacing:0.05em;';
+  d.textContent = t.name || '';
+  cell.appendChild(d);
+}
+function renderDate(cell, t) {
+  cell.classList.add('cell-center');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;font-size:18px;';
+  d.textContent = t.date ? formatDate(t.date) : '';
+  cell.appendChild(d);
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, dd] = dateStr.split('-');
+  return `${y}年${parseInt(m)}月${parseInt(dd)}日`;
+}
+function renderInstructor(cell, t) {
+  cell.classList.add('cell-center');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;font-size:17px;';
+  d.textContent = t.instructor || '';
+  cell.appendChild(d);
+}
+function renderReferee(cell, t) {
+  cell.classList.add('cell-center');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;font-size:17px;';
+  d.textContent = t.referee || '';
+  cell.appendChild(d);
+}
+function renderVenue(cell, t) {
+  cell.classList.add('cell-center');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;font-size:17px;';
+  d.textContent = t.venue || '';
+  cell.appendChild(d);
+}
+function renderTransport(cell, t) {
+  cell.classList.add('cell-center');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;font-size:17px;';
+  d.textContent = t.transport || '';
+  cell.appendChild(d);
+}
+function renderGather(cell, t) {
+  cell.classList.add('cell-left');
+  const d = document.createElement('div');
+  d.className = 'preview-text';
+  d.style.cssText = 'font-size:15px;padding:2px;';
+  d.textContent = t.gathering || '';
+  cell.appendChild(d);
+}
+function renderRecept(cell, t) {
+  cell.classList.add('cell-left');
+  const d = document.createElement('div');
+  d.className = 'preview-text';
+  d.style.cssText = 'font-size:15px;padding:2px;';
+  d.textContent = t.reception || '';
+  cell.appendChild(d);
+}
+function renderNotes(cell, t) {
+  cell.classList.add('cell-left');
+  const d = document.createElement('div');
+  d.className = 'preview-text';
+  d.style.cssText = 'font-size:15px;padding:2px;';
+  d.textContent = t.notes || '';
+  cell.appendChild(d);
+}
+
+function renderMembers(cell, t) {
+  cell.classList.add('cell-left');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'members-preview';
+
+  // Individual
+  if (t.individual && t.individual.enabled && t.individual.members.length > 0) {
+    const sec = document.createElement('div');
+    sec.className = 'members-preview-section';
+    const ttl = document.createElement('div');
+    ttl.className = 'members-preview-title';
+    ttl.textContent = '【個人戦】';
+    sec.appendChild(ttl);
+    const names = document.createElement('div');
+    names.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;font-size:14px;';
+    t.individual.members.forEach(m => {
+      if (m) {
+        const span = document.createElement('span');
+        span.style.cssText = 'background:#c8e6c9;border-radius:2px;padding:1px 5px;';
+        span.textContent = m;
+        names.appendChild(span);
+      }
+    });
+    sec.appendChild(names);
+    wrapper.appendChild(sec);
+  }
+
+  // Teams
+  if (t.teams && t.teams.length > 0) {
+    t.teams.forEach(team => {
+      const sec = document.createElement('div');
+      sec.className = 'members-preview-section';
+      const ttl = document.createElement('div');
+      ttl.className = 'members-preview-title';
+      ttl.textContent = `【${team.teamName}】${team.format}人制`;
+      sec.appendChild(ttl);
+      const posDiv = document.createElement('div');
+      posDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;font-size:14px;';
+      const positions = team.format === '5' ? POSITIONS_5 : POSITIONS_3;
+      positions.forEach(pos => {
+        const member = team.members[pos] || '';
+        const span = document.createElement('span');
+        span.style.cssText = 'white-space:nowrap;border-right:1px solid #ddd;padding-right:5px;margin-right:2px;';
+        span.textContent = `${pos}：${member || '—'}`;
+        posDiv.appendChild(span);
+      });
+      sec.appendChild(posDiv);
+      wrapper.appendChild(sec);
+    });
+  }
+
+  if ((!t.individual || !t.individual.enabled) && (!t.teams || t.teams.length === 0)) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'font-size:10px;color:#999;';
+    empty.textContent = '';
+    wrapper.appendChild(empty);
+  }
+
+  cell.appendChild(wrapper);
+}
+
+function updatePreview() {
+  buildPreviewSheet();
+  buildMobilePreview();
+}
+
+/* Scale preview to fit container (PC only) */
+function scalePreview() {
+  const wrapper = document.getElementById('preview-wrapper');
+  const sheet = document.getElementById('preview-sheet');
+  if (!wrapper || !sheet) return;
+  // スマホではモバイルプレビューを使うのでスケール処理不要
+  if (window.innerWidth <= 900) {
+    sheet.style.transform = 'none';
+    wrapper.style.height = 'auto';
+    return;
+  }
+  const ww = wrapper.clientWidth;
+  const sheetW = 1122;
+  const scale = Math.min(1, (ww - 20) / sheetW);
+  sheet.style.transform = `scale(${scale})`;
+  const sheetH = 794;
+  wrapper.style.height = `${sheetH * scale + 10}px`;
+}
+
+window.addEventListener('resize', scalePreview);
+
+/* ===================================================================
+   MOBILE PREVIEW（スクショ用カードレイアウト）
+=================================================================== */
+function buildMobilePreview() {
+  const container = document.getElementById('mobile-preview');
+  if (!container) return;
+  container.innerHTML = '';
+
+  [
+    { t: formData.tournament1, label: '大会①' },
+    { t: formData.tournament2, label: '大会②' },
+  ].forEach(({ t, label }) => {
+    container.appendChild(buildMobCard(t, label));
+  });
+}
+
+/* 1大会分のカードを生成 */
+function buildMobCard(t, label) {
+  const card = document.createElement('div');
+  card.className = 'mob-card';
+
+  /* ── タイトル（濃い緑） ── */
+  const titleDiv = document.createElement('div');
+  titleDiv.className = 'mob-card-title';
+  if (t.name) {
+    titleDiv.textContent = t.name;
+    const sub = document.createElement('div');
+    sub.className = 'mob-card-title-sub';
+    sub.textContent = label;
+    titleDiv.appendChild(sub);
+  } else {
+    titleDiv.textContent = label + '（未入力）';
+  }
+  card.appendChild(titleDiv);
+
+  /* ── 日程 ── */
+  if (t.date) {
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'mob-card-date';
+    dateDiv.textContent = '📅 ' + formatDate(t.date);
+    card.appendChild(dateDiv);
+  }
+
+  /* ── データ行コンテナ ── */
+  const body = document.createElement('div');
+
+  /* 選手 */
+  const hasIndiv = t.individual && t.individual.enabled && t.individual.members.some(m => m);
+  const hasTeams = t.teams && t.teams.length > 0;
+  if (hasIndiv || hasTeams) {
+    const valueEl = document.createElement('div');
+
+    if (hasIndiv) {
+      const grp = document.createElement('div');
+      grp.style.marginBottom = '6px';
+      const gtitle = document.createElement('span');
+      gtitle.className = 'mob-member-group-title';
+      gtitle.textContent = '個人戦';
+      grp.appendChild(gtitle);
+      const chips = document.createElement('div');
+      chips.className = 'mob-member-chips';
+      t.individual.members.filter(m => m).forEach(m => {
+        const chip = document.createElement('span');
+        chip.className = 'mob-member-chip';
+        chip.textContent = m;
+        chips.appendChild(chip);
+      });
+      grp.appendChild(chips);
+      valueEl.appendChild(grp);
+    }
+
+    if (hasTeams) {
+      t.teams.forEach(team => {
+        const blk = document.createElement('div');
+        blk.className = 'mob-team-block';
+        const gtitle = document.createElement('span');
+        gtitle.className = 'mob-member-group-title';
+        gtitle.textContent = `${team.teamName}（${team.format}人制）`;
+        blk.appendChild(gtitle);
+        const posWrap = document.createElement('div');
+        posWrap.className = 'mob-pos-table';
+        const positions = team.format === '5' ? POSITIONS_5 : POSITIONS_3;
+        positions.forEach(pos => {
+          const item = document.createElement('span');
+          item.className = 'mob-pos-item';
+          const lbl = document.createElement('span');
+          lbl.className = 'mob-pos-label';
+          lbl.textContent = pos;
+          item.appendChild(lbl);
+          item.appendChild(document.createTextNode(team.members[pos] || '—'));
+          posWrap.appendChild(item);
+        });
+        blk.appendChild(posWrap);
+        valueEl.appendChild(blk);
+      });
+    }
+
+    body.appendChild(buildMobRow('選手', valueEl));
+  }
+
+  /* 指導者〜備考: 値があるものだけ表示 */
+  const simpleRows = [
+    { label: '指導者', value: t.instructor },
+    { label: '審判',   value: t.referee },
+    { label: '会場',   value: t.venue },
+    { label: '移動',   value: t.transport },
+    { label: '集合\n出発', value: t.gathering },
+    { label: '受付',   value: t.reception },
+    { label: '備考',   value: t.notes },
+  ];
+  simpleRows.forEach(({ label, value }) => {
+    if (!value) return;
+    const vDiv = document.createElement('div');
+    vDiv.style.whiteSpace = 'pre-wrap';
+    vDiv.textContent = value;
+    body.appendChild(buildMobRow(label, vDiv));
+  });
+
+  card.appendChild(body);
+  return card;
+}
+
+/* ラベル＋値の1行を生成 */
+function buildMobRow(labelText, valueEl) {
+  const row = document.createElement('div');
+  row.className = 'mob-row';
+  const lbl = document.createElement('div');
+  lbl.className = 'mob-label';
+  lbl.textContent = labelText;
+  const val = document.createElement('div');
+  val.className = 'mob-value';
+  val.appendChild(valueEl);
+  row.appendChild(lbl);
+  row.appendChild(val);
+  return row;
+}
+
+/* ===================================================================
+   AUTO SAVE / RESTORE DRAFT
+=================================================================== */
+function autoSaveDraft() {
+  if (editingId !== null) return; // Don't overwrite draft when editing
+  try {
+    localStorage.setItem(LS_FORM, JSON.stringify(formData));
+  } catch (e) {}
+}
+
+function restoreDraft() {
+  try {
+    const saved = localStorage.getItem(LS_FORM);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      formData.tournament1 = Object.assign(emptyTournament(), parsed.tournament1 || {});
+      formData.tournament2 = Object.assign(emptyTournament(), parsed.tournament2 || {});
+    }
+  } catch (e) {}
+}
+
+/* ===================================================================
+   SAVE / EDIT / DELETE
+=================================================================== */
+async function saveRecord() {
+  const record = {
+    savedAt: new Date().toISOString(),
+    tournament1: deepCopy(formData.tournament1),
+    tournament2: deepCopy(formData.tournament2)
+  };
+
+  // Remember candidates
+  rememberCandidatesFromForm();
+
+  if (editingId !== null) {
+    record.id = editingId;
+  }
+
+  try {
+    await dbSave(record);
+    showNotification(editingId !== null ? '更新しました ✓' : '保存しました ✓');
+    editingId = null;
+    document.getElementById('edit-banner').style.display = 'none';
+    localStorage.removeItem(LS_FORM);
+    formData = { tournament1: emptyTournament(), tournament2: emptyTournament() };
+    buildForms();
+    updatePreview();
+    renderList();
+  } catch (e) {
+    showNotification('保存エラー: ' + e.message, true);
+  }
+}
+
+function rememberCandidatesFromForm() {
+  [formData.tournament1, formData.tournament2].forEach(t => {
+    addCandidate('name',      t.name);
+    addCandidate('staff',     t.instructor);
+    addCandidate('staff',     t.referee);
+    addCandidate('venue',     t.venue);
+    addCandidate('transport', t.transport);
+    addCandidate('gather',    t.gathering);
+    addCandidate('recept',    t.reception);
+    addCandidate('notes',     t.notes);
+    if (t.individual && t.individual.members) {
+      t.individual.members.forEach(m => addCandidate('player', m));
+    }
+    if (t.teams) {
+      t.teams.forEach(team => {
+        addCandidate('player', team.teamName);
+        Object.values(team.members).forEach(m => addCandidate('player', m));
+      });
+    }
+  });
+}
+
+async function loadForEdit(id) {
+  try {
+    const record = await dbGet(id);
+    if (!record) return;
+    formData.tournament1 = Object.assign(emptyTournament(), record.tournament1 || {});
+    formData.tournament2 = Object.assign(emptyTournament(), record.tournament2 || {});
+    editingId = id;
+    document.getElementById('edit-banner').style.display = 'block';
+    document.getElementById('edit-id-display').textContent = id;
+    buildForms();
+    updatePreview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showNotification('編集モードで読み込みました');
+  } catch (e) {
+    showNotification('読み込みエラー: ' + e.message, true);
+  }
+}
+
+async function deleteRecord(id) {
+  if (!confirm(`ID:${id} のデータを削除しますか？`)) return;
+  try {
+    await dbDelete(id);
+    showNotification('削除しました');
+    renderList();
+  } catch (e) {
+    showNotification('削除エラー: ' + e.message, true);
+  }
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('edit-banner').style.display = 'none';
+  formData = { tournament1: emptyTournament(), tournament2: emptyTournament() };
+  localStorage.removeItem(LS_FORM);
+  buildForms();
+  updatePreview();
+}
+
+/* ===================================================================
+   LIST
+=================================================================== */
+async function renderList() {
+  try {
+    const records = await dbGetAll();
+    const query = (document.getElementById('search-input').value || '').toLowerCase();
+    const tbody = document.getElementById('records-tbody');
+    tbody.innerHTML = '';
+
+    let filtered = records;
+    if (query) {
+      filtered = records.filter(r => {
+        const n1 = (r.tournament1?.name || '').toLowerCase();
+        const n2 = (r.tournament2?.name || '').toLowerCase();
+        return n1.includes(query) || n2.includes(query);
+      });
+    }
+
+    if (filtered.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.className = 'no-records';
+      td.textContent = 'データがありません';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    // Sort newest first
+    filtered.sort((a, b) => (b.savedAt || '').localeCompare(a.savedAt || ''));
+
+    filtered.forEach(record => {
+      const tr = document.createElement('tr');
+
+      const tdDate = document.createElement('td');
+      tdDate.textContent = formatSavedAt(record.savedAt);
+      tr.appendChild(tdDate);
+
+      const tdN1 = document.createElement('td');
+      tdN1.textContent = record.tournament1?.name || '(未設定)';
+      tr.appendChild(tdN1);
+
+      const tdN2 = document.createElement('td');
+      tdN2.textContent = record.tournament2?.name || '(未設定)';
+      tr.appendChild(tdN2);
+
+      const tdOps = document.createElement('td');
+      tdOps.style.whiteSpace = 'nowrap';
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn-edit';
+      editBtn.textContent = '✏ 編集';
+      editBtn.onclick = () => loadForEdit(record.id);
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-danger';
+      delBtn.textContent = '🗑 削除';
+      delBtn.style.marginLeft = '6px';
+      delBtn.onclick = () => deleteRecord(record.id);
+      tdOps.appendChild(editBtn);
+      tdOps.appendChild(delBtn);
+      tr.appendChild(tdOps);
+
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    console.error('List render error:', e);
+  }
+}
+
+function formatSavedAt(isoStr) {
+  if (!isoStr) return '';
+  try {
+    const d = new Date(isoStr);
+    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  } catch { return isoStr; }
+}
+
+/* ===================================================================
+   UTILITIES
+=================================================================== */
+function deepCopy(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function showNotification(msg, isError = false) {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.style.background = isError ? '#ef5350' : '#4caf50';
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 2500);
+}
+
+/* ===================================================================
+   候補記憶管理モーダル
+=================================================================== */
+// カテゴリ定義: { key, label }
+const CAND_CATEGORIES = [
+  { key: 'player', label: '選手候補（個人戦・団体戦）' },
+  { key: 'staff',  label: '指導者 / 審判候補' },
+  { key: 'venue',  label: '会場候補' },
+  { key: 'transport', label: '移動候補' },
+  { key: 'gather', label: '集合出発候補' },
+  { key: 'recept', label: '受付候補' },
+  { key: 'notes',  label: '備考候補' },
+  { key: 'name',   label: '試合名候補' },
+];
+
+function openCandManager() {
+  renderCandManager();
+  document.getElementById('cand-modal-overlay').style.display = 'block';
+}
+
+function closeCandManager() {
+  document.getElementById('cand-modal-overlay').style.display = 'none';
+}
+
+// モーダル外クリックで閉じる
+document.addEventListener('click', (e) => {
+  const overlay = document.getElementById('cand-modal-overlay');
+  if (e.target === overlay) closeCandManager();
+});
+
+function renderCandManager() {
+  const body = document.getElementById('cand-manager-body');
+  body.innerHTML = '';
+  const cands = loadCandidates();
+
+  CAND_CATEGORIES.forEach(({ key, label }) => {
+    const items = cands[key] || [];
+    const sec = document.createElement('div');
+    sec.className = 'cand-section';
+
+    // ヘッダー
+    const hdr = document.createElement('div');
+    hdr.className = 'cand-section-header';
+    const ttl = document.createElement('span');
+    ttl.className = 'cand-section-title';
+    ttl.textContent = `${label}（${items.length}件）`;
+    const clrBtn = document.createElement('button');
+    clrBtn.className = 'btn-clear-all';
+    clrBtn.textContent = '全削除';
+    clrBtn.onclick = () => {
+      if (!confirm(`「${label}」の全候補を削除しますか？`)) return;
+      const c2 = loadCandidates();
+      c2[key] = [];
+      saveCandidates(c2);
+      renderCandManager();
+      buildForms(); // チップ再描画
+    };
+    hdr.appendChild(ttl);
+    hdr.appendChild(clrBtn);
+    sec.appendChild(hdr);
+
+    // チップ一覧
+    const list = document.createElement('div');
+    list.className = 'cand-chip-list';
+    if (items.length === 0) {
+      const empty = document.createElement('span');
+      empty.className = 'cand-empty';
+      empty.textContent = '（なし）';
+      list.appendChild(empty);
+    } else {
+      items.forEach((item, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'cand-chip-item';
+        const txt = document.createElement('span');
+        txt.textContent = item;
+        const delBtn = document.createElement('button');
+        delBtn.className = 'cand-chip-del';
+        delBtn.textContent = '×';
+        delBtn.title = '削除';
+        delBtn.onclick = () => {
+          const c2 = loadCandidates();
+          if (c2[key]) c2[key].splice(idx, 1);
+          saveCandidates(c2);
+          renderCandManager();
+          buildForms();
+        };
+        chip.appendChild(txt);
+        chip.appendChild(delBtn);
+        list.appendChild(chip);
+      });
+    }
+    sec.appendChild(list);
+    body.appendChild(sec);
+  });
+}
+
+/* ===================================================================
+   INIT
+=================================================================== */
+async function init() {
+  // Open DB
+  try {
+    db = await openDB();
+  } catch (e) {
+    console.error('IndexedDB open error:', e);
+    showNotification('DBエラー: ' + e.message, true);
+  }
+
+  // Restore draft (only if not editing)
+  if (editingId === null) {
+    restoreDraft();
+  }
+
+  // Build forms
+  buildForms();
+
+  // Build preview
+  updatePreview();
+
+  // Load list
+  renderList();
+}
+
+// Run
+init();
+</script>
+</body>
+</html>
